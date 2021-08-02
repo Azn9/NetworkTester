@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.NoSuchElementException;
@@ -27,6 +28,24 @@ public class Main {
         logger.info("");
 
         Scanner scanner = new Scanner(System.in);
+
+        Thread testThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Main.loop(logger);
+                } catch (Exception exception) {
+                    logger.error("Error", exception);
+                }
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        });
+        testThread.setDaemon(true);
+        testThread.start();
+
         while (true) {
             String input;
 
@@ -36,21 +55,18 @@ public class Main {
                 continue;
             }
 
-            if ("stop".equalsIgnoreCase(input))
+            if ("stop".equalsIgnoreCase(input)) {
                 break;
-
-            try {
-                loop(logger);
-            } catch (Exception e) {
-                logger.error("Error", e);
             }
 
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            } catch (InterruptedException exception) {
+                exception.printStackTrace();
             }
         }
+
+        testThread.interrupt();
 
         logger.traceExit();
 
@@ -63,48 +79,48 @@ public class Main {
         InetAddress inet = null;
         try {
             inet = InetAddress.getByName("8.8.8.8");
-        } catch (UnknownHostException e) {
-            logger.fatal("Unknown host 8.8.8.8", e);
+        } catch (UnknownHostException exception) {
+            logger.fatal("Unknown host 8.8.8.8", exception);
         }
 
         try {
             if (inet != null && !inet.isReachable(1000)) {
-                if (does8ping) {
+                if (Main.does8ping) {
                     logger.fatal("Lost connection to 8.8.8.8 !");
-                    does8ping = false;
+                    Main.does8ping = false;
                 } else {
                     logger.info("8.8.8.8 is alive !");
-                    does8ping = true;
+                    Main.does8ping = true;
                 }
             }
-        } catch (IOException e) {
-            logger.fatal("IOE 8.8.8.8", e);
+        } catch (IOException exception) {
+            logger.fatal("IOE 8.8.8.8", exception);
         }
-        logger.trace("RTT : " + (System.currentTimeMillis() - currentMilis) + "ms");
+        logger.trace("8.8.8.8 - RTT : " + (System.currentTimeMillis() - currentMilis) + "ms");
 
         logger.trace("Pinging 1.1.1.1...");
         currentMilis = System.currentTimeMillis();
         inet = null;
         try {
             inet = InetAddress.getByName("1.1.1.1");
-        } catch (UnknownHostException e) {
-            logger.fatal("Unknown host 1.1.1.1", e);
+        } catch (UnknownHostException exception) {
+            logger.fatal("Unknown host 1.1.1.1", exception);
         }
 
         try {
             if (inet != null && !inet.isReachable(1000)) {
-                if (does1ping) {
+                if (Main.does1ping) {
                     logger.fatal("Lost connection to 1.1.1.1 !");
-                    does1ping = false;
+                    Main.does1ping = false;
                 } else {
                     logger.info("1.1.1.1 is alive !");
-                    does1ping = true;
+                    Main.does1ping = true;
                 }
             }
-        } catch (IOException e) {
-            logger.fatal("IOE 1.1.1.1", e);
+        } catch (IOException exception) {
+            logger.fatal("IOE 1.1.1.1", exception);
         }
-        logger.trace("RTT : " + (System.currentTimeMillis() - currentMilis) + "ms");
+        logger.trace("1.1.1.1 - RTT : " + (System.currentTimeMillis() - currentMilis) + "ms");
 
         logger.trace("Trying to get https://example.com/");
         currentMilis = System.currentTimeMillis();
@@ -113,8 +129,12 @@ public class Main {
         try {
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-        } catch (IOException e) {
-            logger.fatal("IOE", e);
+            connection.setConnectTimeout(2000);
+            connection.setReadTimeout(2000);
+        } catch (SocketTimeoutException timeoutException) {
+            logger.fatal("Connection timed out !", timeoutException);
+        } catch (IOException exception) {
+            logger.fatal("IOE", exception);
         }
 
         if (connection != null) {
@@ -123,11 +143,11 @@ public class Main {
                 if ((code = connection.getResponseCode()) != 200) {
                     throw new IOException("Response code: " + code);
                 }
-            } catch (IOException e) {
-                logger.fatal("IOE2", e);
+            } catch (IOException exception) {
+                logger.fatal("IOE2", exception);
             }
         }
-        logger.trace("RTT : " + (System.currentTimeMillis() - currentMilis) + "ms");
+        logger.trace("WEBSITE - RTT : " + (System.currentTimeMillis() - currentMilis) + "ms");
     }
 
 }

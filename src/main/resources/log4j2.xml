@@ -9,8 +9,6 @@
                      advertise="true" ignoreExceptions="false">
             <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
             <Policies>
-                <OnStartupTriggeringPolicy />
-                <TimeBasedTriggeringPolicy interval="1"/>
                 <SizeBasedTriggeringPolicy size="10 MB" />
             </Policies>
             <DefaultRolloverStrategy max="5"/>
@@ -19,7 +17,7 @@
     <Loggers>
         <Root level="trace">
             <AppenderRef ref="Console" level="info"/>
-            <AppenderRef ref="File" level="trace"/>
+            <AppenderRef ref="File" level="trace" append="true"/>
         </Root>
     </Loggers>
 </Configuration>
