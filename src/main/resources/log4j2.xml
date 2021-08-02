@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+        <RollingFile name="File" fileName="logs/debug.log" filePattern="logs/debug-%d{dd-MMM}.log.gz" bufferedIO="true"
+                     advertiseURI="file:///root/nt/logs/debug.log"
+                     advertise="true" ignoreExceptions="false">
+            <PatternLayout pattern="%d{HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="10 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="5"/>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="File" level="trace"/>
+        </Root>
+    </Loggers>
+</Configuration>

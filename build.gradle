@@ -1,0 +1,21 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id 'java'
+}
+
+group 'dev.azn9'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.logging.log4j:log4j-core:2.14.1'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'dev.azn9.nt.Main'
+    }
+}
