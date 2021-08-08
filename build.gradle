@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     compile 'org.apache.logging.log4j:log4j-core:2.14.1'
+    compile "com.influxdb:influxdb-client-java:2.0.0"
 }
 
 jar {
